@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useCurrency } from '@/hooks/useCurrency';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,6 +27,7 @@ interface AccountsManagerProps {
 export const AccountsManager = ({ accounts, onAccountsChanged }: AccountsManagerProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { formatAmount } = useCurrency();
   const [loading, setLoading] = useState(false);
   const [isAddingAccount, setIsAddingAccount] = useState(false);
   
@@ -209,7 +211,7 @@ export const AccountsManager = ({ accounts, onAccountsChanged }: AccountsManager
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  ${account.current_balance.toFixed(2)}
+                  {formatAmount(account.current_balance)}
                 </div>
                 <p className="text-sm text-muted-foreground">{account.currency}</p>
               </CardContent>

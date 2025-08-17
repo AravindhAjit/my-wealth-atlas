@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useCurrency } from '@/hooks/useCurrency';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +10,7 @@ import { PlusCircle, LogOut, Wallet, TrendingUp, TrendingDown } from 'lucide-rea
 import { AddTransactionForm } from './AddTransactionForm';
 import { AccountsManager } from './AccountsManager';
 import { TransactionsList } from './TransactionsList';
+import { CurrencySelector } from './CurrencySelector';
 
 interface Account {
   id: string;
@@ -31,6 +33,7 @@ interface Transaction {
 
 export const Dashboard = () => {
   const { user, signOut } = useAuth();
+  const { formatAmount } = useCurrency();
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -103,13 +106,16 @@ export const Dashboard = () => {
       <header className="border-b border-border">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold">MoneyTracker</h1>
+            <h1 className="text-2xl font-bold text-primary">MoneyTracker</h1>
             <p className="text-muted-foreground">Welcome back, {user?.email}</p>
           </div>
-          <Button onClick={signOut} variant="outline">
-            <LogOut className="mr-2 h-4 w-4" />
-            Sign Out
-          </Button>
+          <div className="flex items-center gap-4">
+            <CurrencySelector />
+            <Button onClick={signOut} variant="outline">
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign Out
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -145,7 +151,7 @@ export const Dashboard = () => {
               <Wallet className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">${totalBalance.toFixed(2)}</div>
+              <div className="text-2xl font-bold">{formatAmount(totalBalance)}</div>
               <p className="text-xs text-muted-foreground">
                 {selectedAccount === 'all' ? 'All accounts' : accounts.find(a => a.id === selectedAccount)?.name}
               </p>
@@ -158,7 +164,7 @@ export const Dashboard = () => {
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">${totalIncome.toFixed(2)}</div>
+              <div className="text-2xl font-bold text-success">{formatAmount(totalIncome)}</div>
               <p className="text-xs text-muted-foreground">This period</p>
             </CardContent>
           </Card>
@@ -169,7 +175,7 @@ export const Dashboard = () => {
               <TrendingDown className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-600">${totalExpenses.toFixed(2)}</div>
+              <div className="text-2xl font-bold text-destructive">{formatAmount(totalExpenses)}</div>
               <p className="text-xs text-muted-foreground">This period</p>
             </CardContent>
           </Card>

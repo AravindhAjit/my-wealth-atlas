@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useCurrency } from '@/hooks/useCurrency';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,6 +34,7 @@ interface AddTransactionFormProps {
 export const AddTransactionForm = ({ accounts, onTransactionAdded, selectedAccountId }: AddTransactionFormProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { formatAmount } = useCurrency();
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [type, setType] = useState<'income' | 'expense'>('expense');
@@ -85,7 +87,7 @@ export const AddTransactionForm = ({ accounts, onTransactionAdded, selectedAccou
 
       toast({
         title: "Transaction added",
-        description: `${type === 'income' ? 'Income' : 'Expense'} of $${formData.amount} has been recorded.`,
+        description: `${type === 'income' ? 'Income' : 'Expense'} of ${formatAmount(parseFloat(formData.amount))} has been recorded.`,
       });
 
       // Reset form
@@ -123,8 +125,8 @@ export const AddTransactionForm = ({ accounts, onTransactionAdded, selectedAccou
     <form onSubmit={handleSubmit} className="space-y-4">
       <Tabs value={type} onValueChange={(value) => setType(value as 'income' | 'expense')}>
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="expense" className="text-red-600">Expense</TabsTrigger>
-          <TabsTrigger value="income" className="text-green-600">Income</TabsTrigger>
+          <TabsTrigger value="expense" className="text-destructive">Expense</TabsTrigger>
+          <TabsTrigger value="income" className="text-success">Income</TabsTrigger>
         </TabsList>
       </Tabs>
 
@@ -141,7 +143,7 @@ export const AddTransactionForm = ({ accounts, onTransactionAdded, selectedAccou
           <SelectContent>
             {accounts.map(account => (
               <SelectItem key={account.id} value={account.id}>
-                {account.name} (${account.current_balance.toFixed(2)})
+                {account.name} ({formatAmount(account.current_balance)})
               </SelectItem>
             ))}
           </SelectContent>
@@ -208,7 +210,12 @@ export const AddTransactionForm = ({ accounts, onTransactionAdded, selectedAccou
         />
       </div>
 
-      <Button type="submit" disabled={loading} className="w-full">
+      <Button 
+        type="submit" 
+        disabled={loading} 
+        className="w-full"
+        variant={type === 'income' ? 'success' : 'default'}
+      >
         {loading ? 'Adding...' : `Add ${type === 'income' ? 'Income' : 'Expense'}`}
       </Button>
     </form>

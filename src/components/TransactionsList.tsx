@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { useCurrency } from '@/hooks/useCurrency';
 import { Trash2, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -24,6 +25,7 @@ interface TransactionsListProps {
 
 export const TransactionsList = ({ transactions, selectedAccount, onTransactionDeleted }: TransactionsListProps) => {
   const { toast } = useToast();
+  const { formatAmount } = useCurrency();
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const filteredTransactions = selectedAccount === 'all' 
@@ -81,8 +83,8 @@ export const TransactionsList = ({ transactions, selectedAccount, onTransactionD
           <div className="flex items-center gap-3">
             <div className={`p-2 rounded-full ${
               transaction.type === 'income' 
-                ? 'bg-green-100 text-green-600' 
-                : 'bg-red-100 text-red-600'
+                ? 'bg-success/20 text-success' 
+                : 'bg-destructive/20 text-destructive'
             }`}>
               {transaction.type === 'income' ? (
                 <ArrowUpRight className="h-4 w-4" />
@@ -117,9 +119,9 @@ export const TransactionsList = ({ transactions, selectedAccount, onTransactionD
           <div className="flex items-center gap-2">
             <div className="text-right">
               <p className={`font-semibold ${
-                transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
+                transaction.type === 'income' ? 'text-success' : 'text-destructive'
               }`}>
-                {transaction.type === 'income' ? '+' : '-'}${transaction.amount.toFixed(2)}
+                {transaction.type === 'income' ? '+' : '-'}{formatAmount(transaction.amount)}
               </p>
             </div>
             
