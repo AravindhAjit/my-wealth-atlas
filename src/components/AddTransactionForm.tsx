@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { CategoryManager } from '@/components/CategoryManager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface Account {
@@ -16,13 +17,6 @@ interface Account {
   description: string;
   current_balance: number;
   currency: string;
-}
-
-interface Category {
-  id: string;
-  name: string;
-  color: string;
-  transaction_type: 'income' | 'expense';
 }
 
 interface AddTransactionFormProps {
@@ -36,7 +30,6 @@ export const AddTransactionForm = ({ accounts, onTransactionAdded, selectedAccou
   const { toast } = useToast();
   const { formatAmount } = useCurrency();
   const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState<Category[]>([]);
   const [type, setType] = useState<'income' | 'expense'>('expense');
   
   const [formData, setFormData] = useState({
@@ -48,22 +41,10 @@ export const AddTransactionForm = ({ accounts, onTransactionAdded, selectedAccou
   });
 
   useEffect(() => {
-    fetchCategories();
-  }, [type]);
-
-  useEffect(() => {
     if (selectedAccountId) {
       setFormData(prev => ({ ...prev, accountId: selectedAccountId }));
     }
   }, [selectedAccountId]);
-
-  const fetchCategories = async () => {
-    const { data } = await supabase
-      .from('categories')
-      .select('*')
-      .eq('transaction_type', type);
-    setCategories(data || []);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -143,7 +124,7 @@ export const AddTransactionForm = ({ accounts, onTransactionAdded, selectedAccou
           <SelectContent>
             {accounts.map(account => (
               <SelectItem key={account.id} value={account.id}>
-                {account.name} ({formatAmount(account.current_balance)})
+                {account.name}
               </SelectItem>
             ))}
           </SelectContent>
@@ -163,30 +144,12 @@ export const AddTransactionForm = ({ accounts, onTransactionAdded, selectedAccou
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="category">Category (optional)</Label>
-        <Select 
-          value={formData.categoryId} 
-          onValueChange={(value) => setFormData(prev => ({ ...prev, categoryId: value }))}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select category" />
-          </SelectTrigger>
-          <SelectContent>
-            {categories.map(category => (
-              <SelectItem key={category.id} value={category.id}>
-                <div className="flex items-center gap-2">
-                  <div 
-                    className="w-3 h-3 rounded-full" 
-                    style={{ backgroundColor: category.color }}
-                  />
-                  {category.name}
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <CategoryManager
+        selectedType={type}
+        selectedCategoryId={formData.categoryId}
+        onCategoryChange={(categoryId) => setFormData(prev => ({ ...prev, categoryId }))}
+        onCategoriesUpdate={() => {}} 
+      />
 
       <div className="space-y-2">
         <Label htmlFor="date">Date</Label>

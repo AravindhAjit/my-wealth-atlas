@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { PlusCircle, LogOut, Wallet, TrendingUp, TrendingDown } from 'lucide-react';
+import { PlusCircle, LogOut, Wallet, TrendingUp, TrendingDown, Settings } from 'lucide-react';
 import { AddTransactionForm } from './AddTransactionForm';
 import { AccountsManager } from './AccountsManager';
 import { TransactionsList } from './TransactionsList';
@@ -33,7 +33,7 @@ interface Transaction {
 }
 
 export const Dashboard = () => {
-  const { user, signOut } = useAuth();
+  const { user, signOut, profile } = useAuth();
   const { formatAmount } = useCurrency();
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -108,11 +108,15 @@ export const Dashboard = () => {
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-primary">MoneyTracker</h1>
-            <p className="text-muted-foreground">Welcome back, {user?.email}</p>
+            <p className="text-muted-foreground">Welcome back, {profile?.username || profile?.display_name || user?.email}</p>
           </div>
           <div className="flex items-center gap-4">
             <CurrencySelector />
             <ThemeToggle />
+            <Button variant="outline" size="sm" onClick={() => window.location.href = '/profile'}>
+              <Settings className="mr-2 h-4 w-4" />
+              Profile
+            </Button>
             <Button onClick={signOut} variant="outline">
               <LogOut className="mr-2 h-4 w-4" />
               Sign Out

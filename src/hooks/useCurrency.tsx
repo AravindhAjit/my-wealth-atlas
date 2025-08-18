@@ -1,45 +1,86 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
-
-export interface Currency {
-  code: string;
-  symbol: string;
-  name: string;
-}
-
-export const CURRENCIES: Currency[] = [
-  { code: 'USD', symbol: '$', name: 'US Dollar' },
-  { code: 'EUR', symbol: '€', name: 'Euro' },
-  { code: 'GBP', symbol: '£', name: 'British Pound' },
-  { code: 'JPY', symbol: '¥', name: 'Japanese Yen' },
-  { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar' },
-  { code: 'AUD', symbol: 'A$', name: 'Australian Dollar' },
-  { code: 'CHF', symbol: 'CHF', name: 'Swiss Franc' },
-  { code: 'CNY', symbol: '¥', name: 'Chinese Yuan' },
-  { code: 'INR', symbol: '₹', name: 'Indian Rupee' },
-  { code: 'BRL', symbol: 'R$', name: 'Brazilian Real' },
-];
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useAuth } from './useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 interface CurrencyContextType {
-  selectedCurrency: Currency;
-  setSelectedCurrency: (currency: Currency) => void;
+  currency: string;
+  setCurrency: (currency: string) => void;
   formatAmount: (amount: number) => string;
 }
 
 const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined);
 
-export const CurrencyProvider = ({ children }: { children: ReactNode }) => {
-  const [selectedCurrency, setSelectedCurrency] = useState<Currency>(CURRENCIES[0]);
+interface CurrencyProviderProps {
+  children: ReactNode;
+}
+
+export function CurrencyProvider({ children }: CurrencyProviderProps) {
+  const { user } = useAuth();
+  const [currency, setCurrencyState] = useState('USD');
+
+  useEffect(() => {
+    if (user) {
+      fetchUserCurrency();
+    }
+  }, [user]);
+
+  const fetchUserCurrency = async () => {
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('default_currency')
+        .eq('user_id', user?.id)
+        .maybeSingle();
+
+      if (data?.default_currency) {
+        setCurrencyState(data.default_currency);
+      }
+    } catch (error) {
+      console.error('Error fetching user currency:', error);
+    }
+  };
+
+  const setCurrency = (newCurrency: string) => {
+    setCurrencyState(newCurrency);
+  };
 
   const formatAmount = (amount: number): string => {
-    return `${selectedCurrency.symbol}${amount.toFixed(2)}`;
+    const currencyMap: Record<string, { symbol: string; locale: string }> = {
+      USD: { symbol: '$', locale: 'en-US' },
+      EUR: { symbol: '€', locale: 'de-DE' },
+      GBP: { symbol: '£', locale: 'en-GB' },
+      JPY: { symbol: '¥', locale: 'ja-JP' },
+      CAD: { symbol: 'C$', locale: 'en-CA' },
+      AUD: { symbol: 'A$', locale: 'en-AU' },
+      CHF: { symbol: 'CHF', locale: 'de-CH' },
+      CNY: { symbol: '¥', locale: 'zh-CN' },
+      INR: { symbol: '₹', locale: 'en-IN' },
+    };
+
+    const config = currencyMap[currency] || currencyMap.USD;
+    
+    try {
+      return new Intl.NumberFormat(config.locale, {
+        style: 'currency',
+        currency: currency,
+      }).format(amount);
+    } catch {
+      return `${config.symbol}${amount.toFixed(2)}`;
+    }
+  };
+
+  const value = {
+    currency,
+    setCurrency,
+    formatAmount,
   };
 
   return (
-    <CurrencyContext.Provider value={{ selectedCurrency, setSelectedCurrency, formatAmount }}>
+    <CurrencyContext.Provider value={value}>
       {children}
     </CurrencyContext.Provider>
   );
-};
+}
 
 export const useCurrency = () => {
   const context = useContext(CurrencyContext);
