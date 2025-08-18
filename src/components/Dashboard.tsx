@@ -11,6 +11,7 @@ import { AddTransactionForm } from './AddTransactionForm';
 import { AccountsManager } from './AccountsManager';
 import { TransactionsList } from './TransactionsList';
 import { CurrencySelector } from './CurrencySelector';
+import { ThemeToggle } from './ThemeToggle';
 
 interface Account {
   id: string;
@@ -111,6 +112,7 @@ export const Dashboard = () => {
           </div>
           <div className="flex items-center gap-4">
             <CurrencySelector />
+            <ThemeToggle />
             <Button onClick={signOut} variant="outline">
               <LogOut className="mr-2 h-4 w-4" />
               Sign Out
