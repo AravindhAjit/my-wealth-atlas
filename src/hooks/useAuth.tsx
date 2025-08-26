@@ -64,7 +64,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signUp = async (username: string, password: string) => {
     const redirectUrl = `${window.location.origin}/`;
-    const fakeEmail = `${username}@app.local`;
+    const fakeEmail = `${username}@moneytracker.app`;
     
     const { error } = await supabase.auth.signUp({
       email: fakeEmail,
@@ -80,7 +80,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signIn = async (username: string, password: string) => {
-    const fakeEmail = `${username}@app.local`;
+    const fakeEmail = `${username}@moneytracker.app`;
     const { error } = await supabase.auth.signInWithPassword({
       email: fakeEmail,
       password,
