@@ -11,7 +11,7 @@ import { Loader2 } from 'lucide-react';
 
 const Auth = () => {
   const { user, signIn, signUp, loading } = useAuth();
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -26,7 +26,7 @@ const Auth = () => {
     setError('');
     setIsLoading(true);
 
-    const { error } = await signIn(email, password);
+    const { error } = await signIn(username, password);
     
     if (error) {
       setError(error.message);
@@ -40,7 +40,7 @@ const Auth = () => {
     setError('');
     setIsLoading(true);
 
-    const { error } = await signUp(email, password);
+    const { error } = await signUp(username, password);
     
     if (error) {
       setError(error.message);
@@ -77,17 +77,17 @@ const Auth = () => {
             
             <TabsContent value="signin">
               <form onSubmit={handleSignIn} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    disabled={isLoading}
-                  />
-                </div>
+                 <div className="space-y-2">
+                   <Label htmlFor="username">Username</Label>
+                   <Input
+                     id="username"
+                     type="text"
+                     value={username}
+                     onChange={(e) => setUsername(e.target.value)}
+                     required
+                     disabled={isLoading}
+                   />
+                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="password">Password</Label>
                   <Input
@@ -118,17 +118,17 @@ const Auth = () => {
             
             <TabsContent value="signup">
               <form onSubmit={handleSignUp} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
-                  <Input
-                    id="signup-email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    disabled={isLoading}
-                  />
-                </div>
+                 <div className="space-y-2">
+                   <Label htmlFor="signup-username">Username</Label>
+                   <Input
+                     id="signup-username"
+                     type="text"
+                     value={username}
+                     onChange={(e) => setUsername(e.target.value)}
+                     required
+                     disabled={isLoading}
+                   />
+                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-password">Password</Label>
                   <Input
