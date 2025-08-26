@@ -63,28 +63,43 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signUp = async (username: string, password: string) => {
-    const redirectUrl = `${window.location.origin}/`;
-    const fakeEmail = `${username}@moneytracker.app`;
+    // Generate a valid fake email that won't trigger validation
+    const fakeEmail = `${username}.user@example.com`;
     
     const { error } = await supabase.auth.signUp({
       email: fakeEmail,
       password,
       options: {
-        emailRedirectTo: redirectUrl,
         data: {
           username: username
         }
       }
     });
+    
+    // Convert email-related errors to username-friendly messages
+    if (error) {
+      if (error.message.includes('email') || error.message.includes('Email')) {
+        return { error: { ...error, message: 'Username already exists or invalid' } };
+      }
+    }
+    
     return { error };
   };
 
   const signIn = async (username: string, password: string) => {
-    const fakeEmail = `${username}@moneytracker.app`;
+    const fakeEmail = `${username}.user@example.com`;
     const { error } = await supabase.auth.signInWithPassword({
       email: fakeEmail,
       password,
     });
+    
+    // Convert email-related errors to username-friendly messages
+    if (error) {
+      if (error.message.includes('email') || error.message.includes('Email')) {
+        return { error: { ...error, message: 'Invalid username or password' } };
+      }
+    }
+    
     return { error };
   };
 
